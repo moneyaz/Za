@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONEY AZ - Plataforma de Pacotes VIP</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        angola: {
+                            gold: '#fbbf24',
+                            emerald: '#10b981',
+                            dark: '#0f172a',
+                            card: '#1e293b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #f1f5f9;
+            touch-action: manipulation;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-modal {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 antialiased selection:bg-amber-500 selection:text-black">
+
+    <!-- Toast Alert Box -->
+    <div id="toast" class="fixed top-4 right-4 left-4 md:left-auto md:w-96 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="p-4 rounded-xl shadow-2xl border flex items-center gap-3 glass-card" id="toast-content">
+            <i id="toast-icon" class="fas fa-check-circle text-xl text-emerald-400"></i>
+            <div id="toast-msg" class="text-sm font-medium text-slate-100">Mensagem aqui</div>
+        </div>
+    </div>
+
+    <!-- NAVEGAÇÃO / HEADER -->
+    <header class="sticky top-0 z-30 glass-card border-b border-slate-800/80 px-4 py-3">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/20">
+                    MAZ
+                </div>
+                <div>
+                    <h1 class="font-bold text-base leading-tight text-slate-100">MONEY AZ</h1>
+                    <span class="text-xs text-amber-400 font-medium flex items-center gap-1">
+                        <i class="fas fa-shield-halved text-[10px]"></i> Rendimento Diário 7.5%
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="openAdminModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
+                    <i class="fas fa-user-gear text-amber-400"></i>
+                    <span class="hidden sm:inline">Painel Admin</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- TELA DE BLOQUEIO / CONVITE OBRIGATÓRIO -->
+    <div id="lock-screen" class="fixed inset-0 z-40 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4">
+        <div class="max-w-md w-full glass-card p-6 sm:p-8 rounded-2xl border border-amber-500/30 text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+            
+            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-amber-400 text-2xl">
+                <i class="fas fa-lock"></i>
+            </div>
+
+            <h2 class="text-2xl font-bold text-white mb-2">MONEY AZ - Restrito</h2>
+            <p class="text-slate-400 text-sm mb-6">Esta plataforma requer um código de convite válido para aceder e adquirir pacotes.</p>
+
+            <div class="space-y-4">
+                <div>
+                    <input type="text" id="invite-code-input" placeholder="Insira o Código de Convite (Ex: VIP123)" class="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 text-center uppercase tracking-wider font-mono font-bold">
+                </div>
+                <button onclick="unlockWithCode()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 transition active:scale-[0.98]">
+                    Validar Acesso <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-500 mt-6">
+                Use o código oficial <b class="text-amber-400">VIP123</b> ou o link de recomendação direto.
+            </p>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-5xl mx-auto px-4 pt-6 space-y-6">
+
+        <!-- RESUMO FINANCEIRO E CARTEIRA -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Saldo Na Carteira</span>
+                    <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm"><i class="fas fa-wallet"></i></span>
+                </div>
+                <div class="text-2xl font-black text-white" id="user-balance">0 Kz</div>
+                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                    <i class="fas fa-clock text-amber-400"></i> Pendente: <span id="user-pending-balance" class="text-amber-400 font-medium">0 Kz</span>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Ganhos por Indicação</span>
+                    <span class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm"><i class="fas fa-users-viewfinder"></i></span>
+                </div>
+                <div class="text-2xl font-black text-amber-400" id="user-referral-earnings">0 Kz</div>
+                <div class="text-xs text-slate-400 mt-2">
+                    Convidados ativos: <span id="user-referral-count" class="text-slate-200 font-bold">0</span> pessoas
+                </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-between gap-3">
+                <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Ações de Saldo</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="openDepositModal()" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 shadow-md shadow-emerald-900/30">
+                        <i class="fas fa-plus-circle"></i> Recarregar
+                    </button>
+                    <button onclick="openWithdrawModal()" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 border border-slate-700 transition active:scale-95">
+                        <i class="fas fa-hand-holding-dollar text-amber-400"></i> Levantar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECÇÃO DE AFILIADOS -->
+        <section class="glass-card p-5 rounded-2xl border-l-4 border-amber-500 relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="font-bold text-white text-lg flex items-center gap-2">
+                        <i class="fas fa-gift text-amber-400"></i> Convite VIP - MONEY AZ
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Ganhe <span class="text-amber-400 font-bold">10%</span> das recargas efetuadas pelos seus convidados!</p>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <input type="text" id="referral-link-input" readonly class="bg-slate-900 border border-slate-700 text-xs text-slate-300 rounded-xl px-3 py-2.5 w-full sm:w-64 font-mono select-all">
+                    <button onclick="copyReferralLink()" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1 shrink-0">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                    <button onclick="shareWhatsapp()" class="p-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition shrink-0" title="Partilhar no WhatsApp">
+                        <i class="fab fa-whatsapp text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CATÁLOGO DE PACOTES DE INVESTIMENTO (7.5% DIÁRIO) -->
+        <section class="space-y-4">
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="text-xl font-black text-white flex items-center gap-2">
+                        <i class="fas fa-boxes-packing text-amber-400"></i> Pacotes MONEY AZ (7.5% / Dia)
+                    </h2>
+                    <p class="text-xs text-slate-400">Selecione o plano desejado para comprar com o seu saldo disponível.</p>
+                </div>
+                <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">Stock Limitado (100 uni/cada)</span>
+            </div>
+
+            <!-- Grelha dos 6 Pacotes -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="packages-grid">
+                <!-- Inserido dinamicamente via JS -->
+            </div>
+        </section>
+
+        <!-- HISTÓRICO DE COMPRAS -->
+        <section class="glass-card p-5 rounded-2xl space-y-4">
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i class="fas fa-history text-amber-400"></i> Minhas Compras & Atividades
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left text-slate-300">
+                    <thead class="bg-slate-900/80 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">Data</th>
+                            <th class="p-3">Descrição / Pacote</th>
+                            <th class="p-3">Valor</th>
+                            <th class="p-3">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-transactions-table" class="divide-y divide-slate-800">
+                        <!-- Transações via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL DE DEPÓSITO -->
+    <div id="deposit-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="max-w-lg w-full glass-modal rounded-2xl p-6 border border-slate-700 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeDepositModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
+                <i class="fas fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-xl font-bold text-white mb-1 flex items-center gap-2">
+                <i class="fas fa-money-bill-transfer text-emerald-400"></i> Recarregar MONEY AZ
+            </h3>
+            <p class="text-xs text-slate-400 mb-6">Efetue o pagamento por Multicaixa Express, IBAN ou KWiK e submeta o comprovativo.</p>
+
+            <!-- Abas de Pagamento -->
+            <div class="flex border-b border-slate-800 mb-4 gap-2">
+                <button onclick="switchPaymentTab('express')" id="tab-express" class="pb-2 px-3 text-xs font-bold border-b-2 border-amber-400 text-amber-400">Multicaixa Express</button>
+                <button onclick="switchPaymentTab('iban')" id="tab-iban" class="pb-2 px-3 text-xs font-bold text-slate-400 hover:text-slate-200">Transferência IBAN</button>
+                <button onclick="switchPaymentTab('kwik')" id="tab-kwik" class="pb-2 px-3 text-xs font-bold text-slate-400 hover:text-slate-200">KWiK / Telefone</button>
+            </div>
+
+            <!-- Conteúdo Express -->
+            <div id="pay-express" class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800 mb-4">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">Entidade:</span>
+                    <span id="cfg-entidade" class="font-mono font-bold text-white tracking-wider">00482</span>
+                    <button onclick="copyText('cfg-entidade')" class="text-amber-400 text-[10px] hover:underline"><i class="fas fa-copy"></i> Copiar</button>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">Referência:</span>
+                    <span id="cfg-referencia" class="font-mono font-bold text-white tracking-wider">984 210 339</span>
+                    <button onclick="copyText('cfg-referencia')" class="text-amber-400 text-[10px] hover:underline"><i class="fas fa-copy"></i> Copiar</button>
+                </div>
+            </div>
+
+            <!-- Conteúdo IBAN -->
+            <div id="pay-iban" class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800 mb-4 hidden">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">Titular:</span>
+                    <span id="cfg-titular" class="font-semibold text-white">MONEY AZ ANGOLA</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">IBAN:</span>
+                    <span id="cfg-iban" class="font-mono font-bold text-amber-400 text-[11px]">AO06 0040 0000 1234 5678 1014 9</span>
+                    <button onclick="copyText('cfg-iban')" class="text-amber-400 text-[10px] hover:underline"><i class="fas fa-copy"></i> Copiar</button>
+                </div>
+            </div>
+
+            <!-- Conteúdo KWiK -->
+            <div id="pay-kwik" class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800 mb-4 hidden">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">Nº KWiK:</span>
+                    <span id="cfg-kwik" class="font-mono font-bold text-emerald-400">923 000 000</span>
+                    <button onclick="copyText('cfg-kwik')" class="text-amber-400 text-[10px] hover:underline"><i class="fas fa-copy"></i> Copiar</button>
+                </div>
+            </div>
+
+            <!-- Formulário -->
+            <form onsubmit="submitDeposit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Valor Depositado (Kz)</label>
+                    <input type="number" id="deposit-amount" required min="1000" placeholder="Ex: 20000" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Nº do Talão / Referência do Pagamento</label>
+                    <input type="text" id="deposit-ref" required placeholder="Ex: TXN98234123" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400 font-mono">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-900/30">
+                    <i class="fas fa-paper-plane mr-1"></i> Submeter Comprovativo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DO PAINEL ADMIN -->
+    <div id="admin-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="max-w-3xl w-full glass-modal rounded-2xl p-6 border border-amber-500/30 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
+                <i class="fas fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Login Admin -->
+            <div id="admin-login-view" class="text-center py-8 max-w-sm mx-auto space-y-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto text-xl">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">MONEY AZ - Admin</h3>
+                <p class="text-xs text-slate-400">Introduza a senha de administrador para gerir a plataforma.</p>
+                <input type="password" id="admin-password-input" placeholder="Senha Admin" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-white focus:outline-none focus:border-amber-400">
+                <button onclick="verifyAdminPassword()" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition">
+                    Entrar no Painel
+                </button>
+            </div>
+
+            <!-- Painel de Controlo Admin -->
+            <div id="admin-dashboard-view" class="hidden space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fas fa-sliders text-amber-400"></i> Painel de Controlo MONEY AZ
+                        </h3>
+                        <span class="text-xs text-emerald-400">Sessão Ativa</span>
+                    </div>
+                    <button onclick="logoutAdmin()" class="text-xs text-red-400 hover:underline"><i class="fas fa-right-from-bracket"></i> Sair</button>
+                </div>
+
+                <!-- Estatísticas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase">Recargas Aprovadas</span>
+                        <div id="adm-stat-deposits" class="text-lg font-bold text-emerald-400">0 Kz</div>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase">Pacotes Vendidos</span>
+                        <div id="adm-stat-sales" class="text-lg font-bold text-amber-400">0</div>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase">Recargas Pendentes</span>
+                        <div id="adm-stat-pending" class="text-lg font-bold text-sky-400">0</div>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase">Comissões Pagas</span>
+                        <div id="adm-stat-commissions" class="text-lg font-bold text-purple-400">0 Kz</div>
+                    </div>
+                </div>
+
+                <!-- Abas Admin -->
+                <div class="flex border-b border-slate-800 gap-4 text-xs font-bold">
+                    <button onclick="switchAdminTab('pending')" id="adm-tab-pending" class="pb-2 text-amber-400 border-b-2 border-amber-400">Aprovar Recargas (<span id="pending-count-badge">0</span>)</button>
+                    <button onclick="switchAdminTab('stock')" id="adm-tab-stock" class="pb-2 text-slate-400 hover:text-white">Gestão de Stock</button>
+                    <button onclick="switchAdminTab('settings')" id="adm-tab-settings" class="pb-2 text-slate-400 hover:text-white">Coordenadas Bancárias</button>
+                </div>
+
+                <!-- Aprovação de Depósitos -->
+                <div id="adm-sec-pending" class="space-y-3">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left text-slate-300">
+                            <thead class="bg-slate-900 text-slate-400 uppercase">
+                                <tr>
+                                    <th class="p-2.5">Data</th>
+                                    <th class="p-2.5">Ref. Talão</th>
+                                    <th class="p-2.5">Valor</th>
+                                    <th class="p-2.5">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-pending-table" class="divide-y divide-slate-800">
+                                <!-- Preenchido dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Gestão de Stock -->
+                <div id="adm-sec-stock" class="hidden space-y-3">
+                    <p class="text-xs text-slate-400">Ajuste a quantidade em stock dos 6 pacotes MONEY AZ:</p>
+                    <div id="admin-stock-list" class="space-y-2">
+                        <!-- Lista de stock via JS -->
+                    </div>
+                </div>
+
+                <!-- Definições Bancárias -->
+                <div id="adm-sec-settings" class="hidden space-y-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                    <h4 class="text-sm font-bold text-white">Editar Dados de Pagamento (Visíveis aos Clientes)</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="text-slate-400 block mb-1">Entidade Express:</label>
+                            <input type="text" id="edit-entidade" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Referência Express:</label>
+                            <input type="text" id="edit-referencia" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">IBAN Angola:</label>
+                            <input type="text" id="edit-iban" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Nº KWiK:</label>
+                            <input type="text" id="edit-kwik" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white">
+                        </div>
+                    </div>
+                    <button onclick="saveAdminSettings()" class="py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition">
+                        Guardar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT PRINCIPAL -->
+    <script>
+        const ADMIN_PASSWORD = '22ggbon';
+        const VALID_INVITES = ['VIP123', 'CONVITE2026', 'OFICIAL', 'ANGOLA', 'MONEYAZ'];
+
+        // Os 6 Pacotes Oficiais MONEY AZ com Rendimento Diário de 7.5%
+        const DEFAULT_PACKAGES = [
+            { id: 'p1', name: 'Pacote Base 1.1', price: 7000, dailyYield: 525, stock: 100, badge: 'Popular' },
+            { id: 'p2', name: 'Pacote Base 1.2', price: 10000, dailyYield: 750, stock: 100, badge: '' },
+            { id: 'p3', name: 'Pacote Base', price: 20000, dailyYield: 1500, stock: 100, badge: '' },
+            { id: 'p4', name: 'Pacote Mini', price: 35000, dailyYield: 2625, stock: 100, badge: 'Recomendado' },
+            { id: 'p5', name: 'Pacote Premium', price: 75000, dailyYield: 5625, stock: 100, badge: 'Alta Procura' },
+            { id: 'p6', name: 'Pacote Master', price: 135000, dailyYield: 10125, stock: 100, badge: 'VIP Max' }
+        ];
+
+        let state = {
+            user: {
+                balance: 0,
+                pendingBalance: 0,
+                referralEarnings: 0,
+                referralCount: 0,
+                inviteCode: 'VIP' + Math.floor(1000 + Math.random() * 9000)
+            },
+            packages: JSON.parse(localStorage.getItem('moneyaz_packages')) || DEFAULT_PACKAGES,
+            deposits: JSON.parse(localStorage.getItem('moneyaz_deposits')) || [],
+            purchases: JSON.parse(localStorage.getItem('moneyaz_purchases')) || [],
+            settings: JSON.parse(localStorage.getItem('moneyaz_settings')) || {
+                entidade: '00482',
+                referencia: '984 210 339',
+                iban: 'AO06 0040 0000 1234 5678 1014 9',
+                titular: 'MONEY AZ ANGOLA',
+                kwik: '923 000 000'
+            }
+        };
+
+        window.onload = function() {
+            checkUrlInviteCode();
+            renderDashboard();
+            renderPackages();
+            updateSettingsUI();
+        };
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+            
+            toastMsg.innerText = message;
+            toastIcon.className = isError ? "fas fa-circle-exclamation text-xl text-red-400" : "fas fa-check-circle text-xl text-emerald-400";
+
+            toast.classList.remove('translate-y-[-150%]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-150%]', 'opacity-0');
+            }, 3500);
+        }
+
+        function checkUrlInviteCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refParam = urlParams.get('ref');
+
+            if (refParam) {
+                document.getElementById('lock-screen').style.display = 'none';
+                showToast("Bem-vindo ao MONEY AZ!");
+            }
+        }
+
+        function unlockWithCode() {
+            const input = document.getElementById('invite-code-input').value.trim().toUpperCase();
+            if (VALID_INVITES.includes(input) || input.startsWith('VIP')) {
+                document.getElementById('lock-screen').style.display = 'none';
+                showToast("Acesso MONEY AZ liberado com sucesso!");
+            } else {
+                showToast("Código de convite inválido.", true);
+            }
+        }
+
+        function formatKz(amount) {
+            return new Intl.NumberFormat('pt-AO').format(amount) + ' Kz';
+        }
+
+        function renderDashboard() {
+            document.getElementById('user-balance').innerText = formatKz(state.user.balance);
+            document.getElementById('user-pending-balance').innerText = formatKz(state.user.pendingBalance);
+            document.getElementById('user-referral-earnings').innerText = formatKz(state.user.referralEarnings);
+            document.getElementById('user-referral-count').innerText = state.user.referralCount;
+
+            const baseUrl = window.location.href.split('?')[0];
+            document.getElementById('referral-link-input').value = `${baseUrl}?ref=VIP123`;
+
+            const table = document.getElementById('user-transactions-table');
+            table.innerHTML = '';
+
+            const allActivities = [
+                ...state.deposits.map(d => ({ date: d.date, name: 'Recarga de Saldo', amount: d.amount, status: d.status })),
+                ...state.purchases.map(p => ({ date: p.date, name: 'Compra: ' + p.packageName, amount: -p.price, status: 'APROVADO' }))
+            ].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            if (allActivities.length === 0) {
+                table.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">Nenhuma atividade registada.</td></tr>`;
+                return;
+            }
+
+            allActivities.forEach(act => {
+                const tr = document.createElement('tr');
+                const isPending = act.status === 'PENDENTE';
+                const isNegative = act.amount < 0;
+
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-400">${act.date}</td>
+                    <td class="p-3 font-semibold text-white">${act.name}</td>
+                    <td class="p-3 font-mono font-bold ${isNegative ? 'text-amber-400' : 'text-emerald-400'}">${isNegative ? '' : '+'}${formatKz(act.amount)}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${isPending ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                            ${act.status}
+                        </span>
+                    </td>
+                `;
+                table.appendChild(tr);
+            });
+        }
+
+        function renderPackages() {
+            const grid = document.getElementById('packages-grid');
+            grid.innerHTML = '';
+
+            state.packages.forEach(pkg => {
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between relative hover:border-amber-500/50 transition-all duration-300";
+
+                const isOutOfStock = pkg.stock <= 0;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg text-white">${pkg.name}</h3>
+                            ${pkg.badge ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">${pkg.badge}</span>` : ''}
+                        </div>
+                        <div class="inline-block px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-3">
+                            Rendimento: 7,5% ao dia (${formatKz(pkg.dailyYield)}/dia)
+                        </div>
+                        <div class="text-2xl font-black text-amber-400 mb-2">${formatKz(pkg.price)}</div>
+                        <div class="text-[11px] text-slate-400 mb-5 flex items-center justify-between">
+                            <span>Unidades restantes:</span>
+                            <span class="font-bold ${isOutOfStock ? 'text-red-400' : 'text-emerald-400'}">${pkg.stock} / 100</span>
+                        </div>
+                    </div>
+
+                    <button onclick="buyPackage('${pkg.id}')" ${isOutOfStock ? 'disabled' : ''} class="w-full py-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 ${isOutOfStock ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-md shadow-amber-500/10 active:scale-95'}">
+                        <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Esgotado' : 'Comprar com Saldo'}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function buyPackage(pkgId) {
+            const pkg = state.packages.find(p => p.id === pkgId);
+            if (!pkg) return;
+
+            if (pkg.stock <= 0) {
+                showToast("Este pacote está esgotado!", true);
+                return;
+            }
+
+            if (state.user.balance < pkg.price) {
+                showToast(`Saldo insuficiente. Recarregue ${formatKz(pkg.price - state.user.balance)}.`, true);
+                openDepositModal();
+                return;
+            }
+
+            state.user.balance -= pkg.price;
+            pkg.stock -= 1;
+
+            state.purchases.push({
+                id: 'PUR-' + Date.now(),
+                packageName: pkg.name,
+                price: pkg.price,
+                date: new Date().toLocaleDateString('pt-PT')
+            });
+
+            localStorage.setItem('moneyaz_packages', JSON.stringify(state.packages));
+            localStorage.setItem('moneyaz_purchases', JSON.stringify(state.purchases));
+
+            renderDashboard();
+            renderPackages();
+            showToast(`Adquiriu o ${pkg.name} com sucesso!`);
+        }
+
+        function submitDeposit(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            const ref = document.getElementById('deposit-ref').value.trim();
+
+            if (!amount || amount < 1000) {
+                showToast("Valor mínimo para recarga: 1.000 Kz", true);
+                return;
+            }
+
+            const newDeposit = {
+                id: 'DEP-' + Date.now(),
+                amount: amount,
+                ref: ref,
+                status: 'PENDENTE',
+                date: new Date().toLocaleDateString('pt-PT')
+            };
+
+            state.deposits.push(newDeposit);
+            state.user.pendingBalance += amount;
+
+            localStorage.setItem('moneyaz_deposits', JSON.stringify(state.deposits));
+
+            closeDepositModal();
+            renderDashboard();
+            showToast("Comprovativo submetido com sucesso! Aguarde aprovação.");
+        }
+
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text);
+            showToast("Copiado com sucesso!");
+        }
+
+        function copyReferralLink() {
+            const linkInput = document.getElementById('referral-link-input');
+            linkInput.select();
+            document.execCommand('copy');
+            showToast("Link MONEY AZ copiado!");
+        }
+
+        function shareWhatsapp() {
+            const link = document.getElementById('referral-link-input').value;
+            const text = encodeURIComponent(`Acede à plataforma MONEY AZ para investir e obter 7.5% de rendimento diário: ${link}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function openDepositModal() { document.getElementById('deposit-modal').classList.remove('hidden'); }
+        function closeDepositModal() { document.getElementById('deposit-modal').classList.add('hidden'); }
+        function openAdminModal() { document.getElementById('admin-modal').classList.remove('hidden'); }
+        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); }
+        function openWithdrawModal() { showToast("Levantamento disponível para saldos acima de 5.000 Kz.", true); }
+
+        function switchPaymentTab(tab) {
+            document.getElementById('pay-express').classList.add('hidden');
+            document.getElementById('pay-iban').classList.add('hidden');
+            document.getElementById('pay-kwik').classList.add('hidden');
+
+            document.getElementById('tab-express').className = "pb-2 px-3 text-xs font-bold text-slate-400 hover:text-slate-200";
+            document.getElementById('tab-iban').className = "pb-2 px-3 text-xs font-bold text-slate-400 hover:text-slate-200";
+            document.getElementById('tab-kwik').className = "pb-2 px-3 text-xs font-bold text-slate-400 hover:text-slate-200";
+
+            if (tab === 'express') {
+                document.getElementById('pay-express').classList.remove('hidden');
+                document.getElementById('tab-express').className = "pb-2 px-3 text-xs font-bold border-b-2 border-amber-400 text-amber-400";
+            } else if (tab === 'iban') {
+                document.getElementById('pay-iban').classList.remove('hidden');
+                document.getElementById('tab-iban').className = "pb-2 px-3 text-xs font-bold border-b-2 border-amber-400 text-amber-400";
+            } else if (tab === 'kwik') {
+                document.getElementById('pay-kwik').classList.remove('hidden');
+                document.getElementById('tab-kwik').className = "pb-2 px-3 text-xs font-bold border-b-2 border-amber-400 text-amber-400";
+            }
+        }
+
+        // LÓGICA DE ADMINISTRAÇÃO
+        function verifyAdminPassword() {
+            const pwd = document.getElementById('admin-password-input').value;
+            if (pwd === ADMIN_PASSWORD) {
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                renderAdminView();
+                showToast("Sessão Admin iniciada com sucesso.");
+            } else {
+                showToast("Senha Admin incorreta!", true);
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('admin-login-view').classList.remove('hidden');
+            document.getElementById('admin-dashboard-view').classList.add('hidden');
+            document.getElementById('admin-password-input').value = '';
+        }
+
+        function renderAdminView() {
+            const approvedDeposits = state.deposits.filter(d => d.status === 'APROVADO');
+            const totalDeposited = approvedDeposits.reduce((acc, d) => acc + d.amount, 0);
+            const pendingDeposits = state.deposits.filter(d => d.status === 'PENDENTE');
+
+            document.getElementById('adm-stat-deposits').innerText = formatKz(totalDeposited);
+            document.getElementById('adm-stat-sales').innerText = state.purchases.length;
+            document.getElementById('adm-stat-pending').innerText = pendingDeposits.length;
+            document.getElementById('pending-count-badge').innerText = pendingDeposits.length;
+
+            const table = document.getElementById('admin-pending-table');
+            table.innerHTML = '';
+
+            if (pendingDeposits.length === 0) {
+                table.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-500">Sem recargas pendentes.</td></tr>`;
+            } else {
+                pendingDeposits.forEach(dep => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-2.5 text-slate-400">${dep.date}</td>
+                        <td class="p-2.5 font-mono text-white">${dep.ref}</td>
+                        <td class="p-2.5 font-bold text-emerald-400">${formatKz(dep.amount)}</td>
+                        <td class="p-2.5 flex gap-2">
+                            <button onclick="approveDeposit('${dep.id}')" class="px-2.5 py-1 bg-emerald-600 text-white rounded font-bold hover:bg-emerald-500">Aprovar</button>
+                            <button onclick="rejectDeposit('${dep.id}')" class="px-2.5 py-1 bg-red-600 text-white rounded font-bold hover:bg-red-500">Rejeitar</button>
+                        </td>
+                    `;
+                    table.appendChild(tr);
+                });
+            }
+
+            const stockList = document.getElementById('admin-stock-list');
+            stockList.innerHTML = '';
+            state.packages.forEach(p => {
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-xs";
+                item.innerHTML = `
+                    <div>
+                        <span class="font-bold text-white">${p.name}</span>
+                        <span class="text-slate-400 block">${formatKz(p.price)} (Rendimento: ${formatKz(p.dailyYield)}/dia)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-400">Stock:</span>
+                        <input type="number" value="${p.stock}" min="0" onchange="updatePackageStock('${p.id}', this.value)" class="w-16 px-2 py-1 bg-slate-800 border border-slate-700 rounded text-center text-amber-400 font-bold">
+                    </div>
+                `;
+                stockList.appendChild(item);
+            });
+        }
+
+        function approveDeposit(depId) {
+            const dep = state.deposits.find(d => d.id === depId);
+            if (!dep) return;
+
+            dep.status = 'APROVADO';
+            state.user.pendingBalance -= dep.amount;
+            state.user.balance += dep.amount;
+
+            state.user.referralEarnings += dep.amount * 0.10;
+            state.user.referralCount += 1;
+
+            localStorage.setItem('moneyaz_deposits', JSON.stringify(state.deposits));
+
+            renderAdminView();
+            renderDashboard();
+            showToast(`Recarga de ${formatKz(dep.amount)} APROVADA!`);
+        }
+
+        function rejectDeposit(depId) {
+            const dep = state.deposits.find(d => d.id === depId);
+            if (!dep) return;
+
+            dep.status = 'REJEITADO';
+            state.user.pendingBalance -= dep.amount;
+
+            localStorage.setItem('moneyaz_deposits', JSON.stringify(state.deposits));
+
+            renderAdminView();
+            renderDashboard();
+            showToast("Recarga rejeitada.", true);
+        }
+
+        function updatePackageStock(pkgId, newStock) {
+            const pkg = state.packages.find(p => p.id === pkgId);
+            if (pkg) {
+                pkg.stock = parseInt(newStock) || 0;
+                localStorage.setItem('moneyaz_packages', JSON.stringify(state.packages));
+                renderPackages();
+                showToast(`Stock do ${pkg.name} atualizado.`);
+            }
+        }
+
+        function saveAdminSettings() {
+            state.settings.entidade = document.getElementById('edit-entidade').value;
+            state.settings.referencia = document.getElementById('edit-referencia').value;
+            state.settings.iban = document.getElementById('edit-iban').value;
+            state.settings.kwik = document.getElementById('edit-kwik').value;
+
+            localStorage.setItem('moneyaz_settings', JSON.stringify(state.settings));
+            updateSettingsUI();
+            showToast("Coordenadas atualizadas!");
+        }
+
+        function updateSettingsUI() {
+            document.getElementById('cfg-entidade').innerText = state.settings.entidade;
+            document.getElementById('cfg-referencia').innerText = state.settings.referencia;
+            document.getElementById('cfg-iban').innerText = state.settings.iban;
+            document.getElementById('cfg-kwik').innerText = state.settings.kwik;
+
+            document.getElementById('edit-entidade').value = state.settings.entidade;
+            document.getElementById('edit-referencia').value = state.settings.referencia;
+            document.getElementById('edit-iban').value = state.settings.iban;
+            document.getElementById('edit-kwik').value = state.settings.kwik;
+        }
+
+        function switchAdminTab(sec) {
+            document.getElementById('adm-sec-pending').classList.add('hidden');
+            document.getElementById('adm-sec-stock').classList.add('hidden');
+            document.getElementById('adm-sec-settings').classList.add('hidden');
+
+            document.getElementById('adm-tab-pending').className = "pb-2 text-slate-400 hover:text-white";
+            document.getElementById('adm-tab-stock').className = "pb-2 text-slate-400 hover:text-white";
+            document.getElementById('adm-tab-settings').className = "pb-2 text-slate-400 hover:text-white";
+
+            if (sec === 'pending') {
+                document.getElementById('adm-sec-pending').classList.remove('hidden');
+                document.getElementById('adm-tab-pending').className = "pb-2 text-amber-400 border-b-2 border-amber-400";
+            } else if (sec === 'stock') {
+                document.getElementById('adm-sec-stock').classList.remove('hidden');
+                document.getElementById('adm-tab-stock').className = "pb-2 text-amber-400 border-b-2 border-amber-400";
+            } else if (sec === 'settings') {
+                document.getElementById('adm-sec-settings').classList.remove('hidden');
+                document.getElementById('adm-tab-settings').className = "pb-2 text-amber-400 border-b-2 border-amber-400";
+            }
+        }
+    </script>
+</body>
+</html>
